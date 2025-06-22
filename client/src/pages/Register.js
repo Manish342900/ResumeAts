@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Auth.css';
+import axios from 'axios';
+import axiosInstance from '../axiosInstance';
 
 const Register = ({ onAuthSuccess }) => {
   const [formData, setFormData] = useState({
@@ -39,22 +41,11 @@ const Register = ({ onAuthSuccess }) => {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          password: formData.password
-        }),
-      });
-
-      const data = await response.json();
-      console.log('Registration successful:', data);
-      // Redirect to login page after successful registration
-      navigate('/login');
+      const response =await axiosInstance.post('/register',formData)
+      console.log(response)
+      if(response.statusText=='Created'){
+        navigate('/login')
+      }
     } catch (err) {
       setError(err.message);
     } finally {

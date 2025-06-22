@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Auth.css';
 import googleIcon from '../assets/google-icon.svg';
+import axiosInstance from '../axiosInstance';
 
 const Login = ({ onAuthSuccess }) => {
   const [formData, setFormData] = useState({
@@ -41,16 +42,15 @@ const Login = ({ onAuthSuccess }) => {
     setError('');
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Login failed');
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      onAuthSuccess(data.user, data.token);
+
+      const response =await axiosInstance.post('/login',formData)
+      
+     
+   
+      if (!response.statusText=='OK') throw new Error(response.data.error || 'Login failed');
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      onAuthSuccess(response.data.user, response.data.token);
       navigate('/dashboard');
     } catch (err) {
       setError(err.message);
@@ -62,19 +62,24 @@ const Login = ({ onAuthSuccess }) => {
   const handleGoogleLogin = () => {
     setError('');
     setLoading(true);
-    window.location.href = 'http://localhost:5000/api/auth/google';
+    window.location.href = `${ process.env.NODE_ENV === "development"
+      ? "http://localhost:5000/api/auth/google"
+      :'/api/auth/google'}` ;
   };
 
   const handleGoogleAuthSuccess = async (token) => {
     try {
-      const verifyResponse = await fetch('http://localhost:5000/api/verify-auth', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (!verifyResponse.ok) throw new Error('Token verification failed');
-      const userData = await verifyResponse.json();
+      const verifyResponse=await axiosInstance.get('/verify-auth',{
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+      console.log(verifyResponse)
+      if (!verifyResponse.statusText=='OK') throw new Error('Token verification failed');
+     
       localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(userData.user));
-      if (onAuthSuccess) onAuthSuccess(userData.user, token);
+      localStorage.setItem('user', JSON.stringify(verifyResponse.data.user));
+      if (onAuthSuccess) onAuthSuccess(verifyResponse.data.user, token);
       navigate('/dashboard');
       window.history.replaceState({}, document.title, window.location.pathname);
     } catch (err) {

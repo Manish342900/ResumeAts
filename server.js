@@ -14,7 +14,7 @@ const session = require('express-session');
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
-const jwt = require('jsonwebtoken'); 
+const jwt = require('jsonwebtoken');
 
 const { connectDB } = require('./server/config/db');
 const User = require('./server/models/User');
@@ -280,7 +280,7 @@ passport.use(new GoogleStrategy({
 }, async (req, accessToken, refreshToken, profile, done) => {
   try {
     console.log('Google profile:', profile); // Debug log
-    
+
     if (!profile.emails || !profile.emails[0]) {
       return done(new Error('No email found in Google profile'));
     }
@@ -325,8 +325,8 @@ app.get('/api/auth/google', passport.authenticate('google', {
 
 // Google callback
 // Google callback route
-app.get('/api/auth/google/callback', 
-  passport.authenticate('google', { 
+app.get('/api/auth/google/callback',
+  passport.authenticate('google', {
     failureRedirect: '/login',
     session: false,
     failureMessage: true
@@ -376,7 +376,7 @@ app.post('/api/register', async (req, res) => {
 
     // Create new user
     const user = await User.create({ name, email, password });
-    
+
     // Generate token
     const token = jwt.sign(
       { email: user.email },
@@ -402,11 +402,24 @@ app.post('/api/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    if (!password) {
+      return res.status(400).json({ error: 'Password is required' });
+    }
+
+    
     // Find user
     const user = await User.findByEmail(email);
-    if (!user) {
+
+    if(user.googleId){
+      return res.status(401).json({ error: 'Please use Google Login' });
+    }
+
+
+
+    if (!user || !user.password) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
+
 
     // Validate password
     const isValidPassword = await User.validatePassword(password, user.password);
@@ -673,8 +686,8 @@ app.post('/api/chat', async (req, res) => {
 
     // Check if user wants to see a specific section
     for (const [section, keywords] of Object.entries(sectionMap)) {
-      if (keywords.some(keyword => lowerMsg.includes(keyword)) && 
-          (lowerMsg.includes('show') || lowerMsg.includes('see') || lowerMsg.includes('view') || lowerMsg.includes('what is my'))) {
+      if (keywords.some(keyword => lowerMsg.includes(keyword)) &&
+        (lowerMsg.includes('show') || lowerMsg.includes('see') || lowerMsg.includes('view') || lowerMsg.includes('what is my'))) {
         if (sections[section]) {
           return res.json({
             message: `Here's your ${section} section:\n\n${sections[section]}`,
@@ -693,7 +706,7 @@ app.post('/api/chat', async (req, res) => {
     res.status(500).json({ error: 'Error processing chat request' });
   }
 });
- 
+
 // Verify Authentication
 app.get('/api/verify-auth', auth, (req, res) => {
   res.json({ valid: true, user: req.user });
