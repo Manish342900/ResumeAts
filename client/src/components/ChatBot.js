@@ -70,35 +70,42 @@ const ChatBot = ({ analysisData, file }) => {
     setError(null);
 
     try {
-      const response = await fetch('http://localhost:5000/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: userMessage,
-          analysisData: analysisData,
-          cvDetails: cvDetails
-        }),
-      });
+      const response=await axiosInstance.post('/chat',{
+        message:userMessage,
+        analysisData:analysisData,
+        cvDetails:cvDetails
+      })
+      // console.log(res)
+     
+      // const response = await fetch('http://localhost:5000/api/chat', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify({
+      //     message: userMessage,
+      //     analysisData: analysisData,
+      //     cvDetails: cvDetails
+      //   }),
+      // });
 
-      const data = await response.json();
+      // const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.details || data.error || 'Failed to get response');
+      if (!response.data.statusText==='OK') {
+        throw new Error(response.data.details || response.data.error || 'Failed to get response');
       }
 
       setMessages(prev => [...prev, {
-        text: data.message,
+        text: response.data.message,
         type: 'assistant',
-        timestamp: data.timestamp,
-        action: data.action // For potential future interactive features
+        timestamp: response.data.timestamp,
+        action: response?.data?.action 
       }]);
     } catch (err) {
       console.error('Error sending message:', err);
       setError(err.message);
       setMessages(prev => [...prev, {
-        text: `Error: ${err.message}. Please try again.`,
+        text: `Error: Please try again.`,
         type: 'error',
         timestamp: new Date().toISOString()
       }]);

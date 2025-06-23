@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import ChatBot from './ChatBot';
 import './AnalysisResults.css';
+import axiosInstance from '../axiosInstance';
 
 function AnalysisResults() {
   const location = useLocation();
@@ -21,25 +22,9 @@ function AnalysisResults() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Fetch analysis details if no location.state and id param exists
-  useEffect(() => {
-    if (!location.state && id) {
-      setLoading(true);
-      const token = localStorage.getItem('token');
-      fetch(`/api/resume-history/${id}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-        .then(res => {
-          if (!res.ok) throw new Error('Failed to fetch analysis details');
-          return res.json();
-        })
-        .then(data => setAnalysisData(data))
-        .catch(err => setError(err.message))
-        .finally(() => setLoading(false));
-    }
-  }, [location.state, id]);
 
-  // Redirect if neither state nor id
+
+ 
   useEffect(() => {
     if (!location.state && !id) {
       navigate('/analyze', { replace: true });

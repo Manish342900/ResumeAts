@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './ResumeHistory.css';
+import axiosInstance from '../axiosInstance';
 
 const ResumeHistory = ({ user }) => {
   const [history, setHistory] = useState([]);
@@ -13,20 +14,21 @@ const ResumeHistory = ({ user }) => {
   const fetchResumeHistory = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/resume-history', {
+      const response = await axiosInstance.get('/resume-history', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
-      });
+      })
 
-      if (!response.ok) {
+
+      if (!response.data.statusText === 'OK') {
         throw new Error('Failed to fetch resume history');
       }
 
-      const data = await response.json();
-      setHistory(data.history);
+
+      setHistory(response.data.history);
     } catch (err) {
-      setError(err.message);
+      setError(err.response.data.message);
     } finally {
       setLoading(false);
     }

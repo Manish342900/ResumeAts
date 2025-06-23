@@ -200,9 +200,49 @@ async function analyzeResumeWithAI(
   }
 }
 
+// New: Helper function for chatbot career advice
+async function chatWithCareerAdvisor(userMessage, cvDetails, analysisData) {
+  try {
+    let prompt = `You are a professional career advisor. Using the following CV details, answer the user's question or provide career/job advice. Be concise, actionable, and professional. Respond as a helpful advisor, not as an AI.\n\nCV Details:\n${cvDetails}`;
+    if (analysisData) {
+      prompt += `\n\nAnalysis Data (such as ATS score, suggestions, etc.):\n${JSON.stringify(analysisData, null, 2)}`;
+    }
+    prompt += `\n\nUser's Question or Message:\n${userMessage}`;
 
+    const response = await axios.post(
+      'https://models.github.ai/inference/chat/completions',
+      {
+        model: 'openai/gpt-4.1-mini',
+        messages: [
+          {
+            role: 'system',
+            content:
+              'You are a professional career advisor. Respond in a concise, actionable, and professional manner. Do not mention you are an AI.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.6,
+        max_tokens: 400
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
 
-
+    const advisorMessage = response.data.choices?.[0]?.message?.content?.trim() ||
+      "I'm sorry, I couldn't generate a response at this time.";
+    return advisorMessage;
+  } catch (error) {
+    console.error('Career advisor chat failed:', error.response?.data || error.message);
+    return "I'm sorry, I couldn't generate a response at this time.";
+  }
+}
 
 // Helper function to extract score from analysis
 function extractScore(analysis) {
@@ -640,67 +680,20 @@ app.post('/api/chat', async (req, res) => {
       });
     }
 
-    const lowerMsg = message.trim().toLowerCase();
-
-    // Handle greetings
-    const greetings = ['hi', 'hello', 'hey', 'yo', 'good morning', 'good evening'];
-    if (greetings.some(greet => lowerMsg.startsWith(greet))) {
-      const greetingResponses = [
-        "Hi! I'm your CV assistant. How can I help with your CV today?",
-        "Hello! Ready to work on your CV? What would you like to know?",
-        "Hi there! Ask me anything about your CV or how to improve it."
-      ];
-      return res.json({
-        message: greetingResponses[Math.floor(Math.random() * greetingResponses.length)],
-        timestamp: new Date().toISOString()
-      });
-    }
-
     // Check if CV details are available
     if (!cvDetails) {
       return res.json({
-        message: "I'm still processing your CV details. Please try again in a moment.",
+        message: "Please upload your CV to get started.",
         timestamp: new Date().toISOString()
       });
     }
 
-    // Extract all sections from CV details
-    const sections = {
-      profile: cvDetails.match(/PROFILE\n([\s\S]*?)(\nEXPERIENCE|\nSKILLS|\nPROJECTS|\nEDUCATION|\nCERTIFICATIONS|$)/i)?.[1]?.trim() || '',
-      experience: cvDetails.match(/EXPERIENCE\n([\s\S]*?)(\nSKILLS|\nPROJECTS|\nEDUCATION|\nCERTIFICATIONS|$)/i)?.[1]?.trim() || '',
-      skills: cvDetails.match(/SKILLS\n([\s\S]*?)(\nPROJECTS|\nEDUCATION|\nCERTIFICATIONS|$)/i)?.[1]?.trim() || '',
-      projects: cvDetails.match(/PROJECTS\n([\s\S]*?)(\nEDUCATION|\nCERTIFICATIONS|$)/i)?.[1]?.trim() || '',
-      education: cvDetails.match(/EDUCATION\n([\s\S]*?)(\nCERTIFICATIONS|$)/i)?.[1]?.trim() || '',
-      certifications: cvDetails.match(/CERTIFICATIONS\n([\s\S]*)/i)?.[1]?.trim() || ''
-    };
-
-    // Section mapping with more keywords
-    const sectionMap = {
-      profile: ['profile', 'summary', 'about me', 'personal statement', 'objective'],
-      experience: ['experience', 'work', 'employment', 'job history', 'career', 'positions'],
-      skills: ['skills', 'technical skills', 'abilities', 'competencies', 'proficiencies'],
-      projects: ['projects', 'portfolio', 'work samples', 'case studies'],
-      education: ['education', 'degree', 'qualifications', 'school', 'university', 'college'],
-      certifications: ['certifications', 'certificates', 'licenses', 'credentials']
-    };
-
-    // Check if user wants to see a specific section
-    for (const [section, keywords] of Object.entries(sectionMap)) {
-      if (keywords.some(keyword => lowerMsg.includes(keyword)) &&
-        (lowerMsg.includes('show') || lowerMsg.includes('see') || lowerMsg.includes('view') || lowerMsg.includes('what is my'))) {
-        if (sections[section]) {
-          return res.json({
-            message: `Here's your ${section} section:\n\n${sections[section]}`,
-            timestamp: new Date().toISOString()
-          });
-        } else {
-          return res.json({
-            message: `Your ${section} section appears to be empty. Would you like help creating content for it?`,
-            timestamp: new Date().toISOString()
-          });
-        }
-      }
-    }
+    // Always use the career advisor model for all questions
+    const advisorMessage = await chatWithCareerAdvisor(message, cvDetails, analysisData);
+    return res.json({
+      message: advisorMessage,
+      timestamp: new Date().toISOString()
+    });
   } catch (error) {
     console.error('Error in chat endpoint:', error);
     res.status(500).json({ error: 'Error processing chat request' });
