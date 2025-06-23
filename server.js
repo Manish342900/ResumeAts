@@ -395,10 +395,10 @@ app.get('/api/auth/google/callback',
       }
 
       // For traditional web flow
-      res.redirect(`${process.env.FRONTEND_URL}/login?token=${req.user.token}`);
+      res.redirect(`${process.env.REACT_APP_FRONTEND_URL}/login?token=${req.user.token}`);
     } catch (error) {
       console.error('Callback error:', error);
-      res.redirect(`${process.env.FRONTEND_URL}/login?error=auth_failed`);
+      res.redirect(`${process.env.REACT_APP_FRONTEND_URL}/login?error=auth_failed`);
     }
   }
 );
