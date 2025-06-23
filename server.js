@@ -734,6 +734,12 @@ app.post('/api/cv-details', upload.single('resume'), async (req, res) => {
   }
 });
 
+// Serve React app for all other routes
+app.get('*', (req, res) => {
+  if (req.path.startsWith('/api')) return res.status(404).json({ error: 'API route not found' });
+  res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
+});
+
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
