@@ -64,7 +64,7 @@ const Login = ({ onAuthSuccess }) => {
     setLoading(true);
     window.location.href = `${ process.env.NODE_ENV === "development"
       ? "http://localhost:5000/api/auth/google"
-      :'https://resume-ats-git-main-manishs-projects-d53fae75.vercel.app/api/auth/google'}` ;
+      :"https://resumeats-1.onrender.com/api/auth/google"}` ;
   };
 
   const handleGoogleAuthSuccess = async (token) => {

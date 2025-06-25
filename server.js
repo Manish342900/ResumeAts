@@ -30,7 +30,7 @@ const port = process.env.PORT || 5000;
 app.use(cors({
   origin: [
     'http://localhost:3000',
-    'https://resume-ats-git-main-manishs-projects-d53fae75.vercel.app',
+    'https://resume-ats-seven.vercel.app',
     'https://accounts.google.com'
   ],
   credentials: true,
@@ -296,6 +296,7 @@ app.use(session({
     secure: process.env.NODE_ENV !== 'development',
     httpOnly: true,
     sameSite: process.env.NODE_ENV !== 'development' ? 'none' : 'lax',
+    secure:true,
     maxAge: 24 * 60 * 60 * 1000
   }
 }));
