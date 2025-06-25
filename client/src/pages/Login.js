@@ -53,7 +53,7 @@ const Login = ({ onAuthSuccess }) => {
       onAuthSuccess(response.data.user, response.data.token);
       navigate('/dashboard');
     } catch (err) {
-      setError(err.message);
+      setError(err.response.data.error);
     } finally {
       setLoading(false);
     }
@@ -64,7 +64,7 @@ const Login = ({ onAuthSuccess }) => {
     setLoading(true);
     window.location.href = `${ process.env.NODE_ENV === "development"
       ? "http://localhost:5000/api/auth/google"
-      :'/api/auth/google'}` ;
+      :'https://resume-ats-git-main-manishs-projects-d53fae75.vercel.app/api/auth/google'}` ;
   };
 
   const handleGoogleAuthSuccess = async (token) => {
