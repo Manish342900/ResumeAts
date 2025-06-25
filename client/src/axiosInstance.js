@@ -5,7 +5,7 @@ const axiosInstance = axios.create({
   baseURL:
     process.env.NODE_ENV === 'development'
       ? 'http://localhost:5000/api'
-      : '/api',
+      : 'https://resumeats-1.onrender.com/api',
 });
 
 // Request interceptor

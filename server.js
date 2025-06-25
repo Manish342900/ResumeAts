@@ -30,7 +30,7 @@ const port = process.env.PORT || 5000;
 app.use(cors({
   origin: [
     'http://localhost:3000',
-    'https://your-production-frontend.com',
+    'https://resumeats-1.onrender.com',
     'https://accounts.google.com'
   ],
   credentials: true,
@@ -293,9 +293,9 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === 'production',
+    secure: process.env.NODE_ENV !== 'development',
     httpOnly: true,
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    sameSite: process.env.NODE_ENV !== 'development' ? 'none' : 'lax',
     maxAge: 24 * 60 * 60 * 1000
   }
 }));
@@ -442,7 +442,7 @@ app.post('/api/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    if (!password) {
+    if (!password || !email) {
       return res.status(400).json({ error: 'Password is required' });
     }
 
