@@ -30,7 +30,7 @@ const port = process.env.PORT || 5000;
 app.use(cors({
   origin: [
     'http://localhost:3000',
-    'https://resumeats-1.onrender.com',
+    'https://resume-ats-git-main-manishs-projects-d53fae75.vercel.app',
     'https://accounts.google.com'
   ],
   credentials: true,
