@@ -15,16 +15,14 @@ function AnalysisResults() {
     file,
     linkResults,
     keySkills,
-    areasNeedingImprovement
+    areasNeedingImprovement,
+    error: locationError
   } = location.state || {};
   const [fileUrl, setFileUrl] = useState(null);
   const [analysisData, setAnalysisData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-
-
- 
   useEffect(() => {
     if (!location.state && !id) {
       navigate('/analyze', { replace: true });
@@ -42,6 +40,19 @@ function AnalysisResults() {
 
   if (loading) return <div className="loading">Loading analysis details...</div>;
   if (error) return <div className="error">{error}</div>;
+
+  if (locationError) {
+    return (
+      <div className="analysis-results-page">
+        <div className="not-cv-container">
+          <div className="not-cv-icon" role="img" aria-label="Not a CV">📄❌</div>
+          <h2>Oops! This doesn't look like a CV or Resume</h2>
+          <p className="not-cv-message">{locationError || 'The file you uploaded does not appear to be a formatted CV or resume. Please upload a valid CV or resume document in PDF format.'}</p>
+          <a href="/analyze" className="not-cv-back-btn">Try Again</a>
+        </div>
+      </div>
+    );
+  }
 
   // Use either location.state or fetched analysisData
   const data = location.state || analysisData;
