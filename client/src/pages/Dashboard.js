@@ -18,6 +18,11 @@ const Dashboard = () => {
     });
   }, []);
 
+  useEffect(() => {
+    // Call the no-op endpoint once on mount
+    axiosInstance.get('/noop').catch(() => {});
+  }, []);
+
   if (!user) {
     navigate('/login');
     return <p>User data not available.</p>;

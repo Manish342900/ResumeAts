@@ -1,8 +1,15 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import './Home.css';
+import { useEffect } from 'react';
+import axiosInstance from '../axiosInstance';
 
 function Home() {
+  useEffect(() => {
+    // Call the no-op endpoint once on mount
+    axiosInstance.get('/noop').catch(() => {});
+  }, []);
+
   return (
     <div className="home-bg-gradient">
       <div className="home-center-container">

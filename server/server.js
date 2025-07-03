@@ -34,6 +34,11 @@ app.post('/api/analyze-resume', auth, async (req, res) => {
     }
 });
 
+// No-op endpoint
+app.all('/api/noop', (req, res) => {
+    res.status(200).json({ success: true });
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
