@@ -488,6 +488,10 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
+app.all('/api/noop', (req, res) => {
+  res.status(200).json({ success: true });
+});
+
 // Get User Profile
 app.get('/api/profile', auth, async (req, res) => {
   try {
