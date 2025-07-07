@@ -469,6 +469,7 @@
   flex-direction: column;
   gap: 0.25rem;
   animation: fadeInMenu 0.18s;
+  list-style: none;
 }
 .avatar-dropdown-menu .icon-btn {
   width: 100%;
@@ -479,7 +480,7 @@
   border: none;
   padding: 0.7rem 1.2rem;
   border-radius: 8px;
-  color: var(--text-primary);
+  color: #111 !important;
   font-size: 1rem;
   cursor: pointer;
   transition: background 0.18s, color 0.18s;
@@ -487,7 +488,7 @@
 .avatar-dropdown-menu .icon-btn:hover,
 .avatar-dropdown-menu .icon-btn:focus {
   background: var(--primary-color);
-  color: #fff;
+  color: #111 !important;
   outline: none;
 }
 

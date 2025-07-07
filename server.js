@@ -30,7 +30,8 @@ const port = process.env.PORT || 5000;
 app.use(cors({
   origin: [
     'http://localhost:3000',
-    'https://resume-ats-seven.vercel.app',
+    'http://localhost:3001',
+    'https://resume-ats-seven.vercel.app', 
     'https://accounts.google.com'
   ],
   credentials: true,
@@ -447,20 +448,16 @@ app.post('/api/login', async (req, res) => {
       return res.status(400).json({ error: 'Password is required' });
     }
 
-    
     // Find user
     const user = await User.findByEmail(email);
-
-    if(user.googleId){
-      return res.status(401).json({ error: 'Please use Google Login' });
-    }
-
-
 
     if (!user || !user.password) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
+    if (user.googleId) {
+      return res.status(401).json({ error: 'Please use Google Login' });
+    }
 
     // Validate password
     const isValidPassword = await User.validatePassword(password, user.password);
@@ -738,6 +735,52 @@ app.post('/api/cv-details', upload.single('resume'), async (req, res) => {
     });
   }
 });
+
+// Guest Login Endpoint (unique guest per login)
+app.post('/api/guest-login', async (req, res) => {
+  try {
+    const guestId = Math.random().toString(36).substring(2, 10);
+    const guestEmail = `guest_${guestId}@guest.com`;
+    const guestName = `Guest-${guestId}`;
+    // Create guest user with a random password (never used) and guest flag
+    const guestUser = await User.create({
+      email: guestEmail,
+      password: Math.random().toString(36).slice(-8),
+      name: guestName,
+      isGuest: true,
+      createdAt: new Date()
+    });
+    // Generate token
+    const token = jwt.sign(
+      { email: guestUser.email },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+    res.json({
+      user: {
+        id: guestUser._id,
+        name: guestUser.name,
+        email: guestUser.email
+      },
+      token
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Guest login failed.' });
+  }
+});
+
+// Cleanup: Delete guest users older than 24 hours (run every hour)
+setInterval(async () => {
+  try {
+    const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const result = await db.collection('users').deleteMany({ isGuest: true, createdAt: { $lt: cutoff } });
+    if (result.deletedCount > 0) {
+      console.log(`Deleted ${result.deletedCount} expired guest users.`);
+    }
+  } catch (err) {
+    console.error('Error cleaning up guest users:', err);
+  }
+}, 60 * 60 * 1000); // Every hour
 
 // Serve React app for all other routes
 app.get('*', (req, res) => {

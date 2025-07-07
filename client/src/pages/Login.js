@@ -53,7 +53,8 @@ const Login = ({ onAuthSuccess }) => {
       onAuthSuccess(response.data.user, response.data.token);
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response.data.error);
+      console.log(err)
+      setError(err?.response?.data?.error || err?.message);
     } finally {
       setLoading(false);
     }
