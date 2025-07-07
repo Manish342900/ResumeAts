@@ -88,6 +88,22 @@ const Login = ({ onAuthSuccess }) => {
     }
   };
 
+  const handleGuestLogin = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      const response = await axiosInstance.post('/guest-login');
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      if (onAuthSuccess) onAuthSuccess(response.data.user, response.data.token);
+      navigate('/dashboard');
+    } catch (err) {
+      setError('Guest login failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="login-bg-gradient">
       <div className="login-center-container">
@@ -151,6 +167,21 @@ const Login = ({ onAuthSuccess }) => {
             <span>Don't have an account? </span>
             <Link to="/register" className="login-link">Sign up</Link>
           </div>
+
+          {/* Guest Login Button */}
+          <button
+            className="login-guest-btn"
+            onClick={handleGuestLogin}
+            disabled={loading}
+            style={{ marginTop: '1rem', width: '100%' }}
+          >
+            {/* Guest icon */}
+            <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{marginRight: '0.5rem'}}>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M16 14a4 4 0 10-8 0m8 0a4 4 0 01-8 0m8 0v1a4 4 0 01-4 4m0-5v1a4 4 0 004 4" />
+              <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.5" />
+            </svg>
+            {loading ? 'Logging in as Guest...' : 'Login as Guest'}
+          </button>
         </div>
       </div>
     </div>

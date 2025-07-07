@@ -1,10 +1,30 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import './Navbar.css';
 
 const Navbar = ({ user, onLogout }) => {
   const { isDarkTheme, toggleTheme } = useTheme();
+  const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Helper: get first letter of user's name
+  const getInitial = (name) => name ? name.charAt(0).toUpperCase() : '?';
+
+  // Only show avatar menu on dashboard and if user is logged in
+  const showAvatarMenu = user && location.pathname.startsWith('/dashboard');
+
+  // Helper: detect mobile (<=900px)
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 900);
+  React.useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 900);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Only show login icon on Home, mobile, and not logged in
+  const showMobileLoginIcon = !user && isMobile && (location.pathname === '/' || location.pathname === '/home');
 
   return (
     <nav className="navbar">
@@ -13,6 +33,7 @@ const Navbar = ({ user, onLogout }) => {
           ATS Scorer
         </Link>
         <div className="nav-right">
+          {/* Desktop Menu */}
           <ul className="nav-menu">
             <li className="nav-item">
               <Link to="/" className="nav-links">
@@ -25,7 +46,26 @@ const Navbar = ({ user, onLogout }) => {
               </Link>
             </li>
           </ul>
-          {user ? (
+          {/* Avatar menu for dashboard */}
+          {showAvatarMenu ? (
+            <div className="avatar-menu-wrapper">
+              <button
+                className="avatar-circle"
+                onClick={() => setAvatarMenuOpen(open => !open)}
+                aria-label="Open user menu"
+                aria-expanded={avatarMenuOpen}
+              >
+                {getInitial(user.name)}
+              </button>
+              {avatarMenuOpen && (
+                <ul className="avatar-dropdown-menu">
+                  <li>
+                    <button className="icon-btn" onClick={onLogout}>Logout</button>
+                  </li>
+                </ul>
+              )}
+            </div>
+          ) : user ? (
             <>
               <span className="welcome-message">Welcome, {user.name}</span>
               <button className="logout-button" onClick={onLogout}>
@@ -49,6 +89,18 @@ const Navbar = ({ user, onLogout }) => {
             )}
             <span>{isDarkTheme ? 'Light Mode' : 'Dark Mode'}</span>
           </button>
+          {showMobileLoginIcon && (
+            <button
+              className="mobile-login-icon-btn"
+              aria-label="Login"
+              onClick={() => navigate('/login')}
+            >
+              <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6A2.25 2.25 0 005.25 5.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M18 15l3-3m0 0l-3-3m3 3H9" />
+              </svg>
+            </button>
+          )}
         </div>
       </div>
     </nav>
