@@ -5,7 +5,7 @@
 }
 
 .resume-history h2 {
-  color: var(--text-primary);
+  color: black;
   margin-bottom: 2rem;
   font-size: 1.8rem;
 }
@@ -15,7 +15,7 @@
 .no-history {
   text-align: center;
   padding: 2rem;
-  color: var(--text-secondary);
+  color: black;
   font-size: 1.1rem;
 }
 
@@ -54,7 +54,7 @@
 }
 
 .history-header h3 {
-  color: var(--text-primary);
+  color: black;
   margin: 0;
   font-size: 1.2rem;
 }
