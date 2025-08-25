@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import axiosInstance from '../axiosInstance';
 import './Dashboard.css';
 
-const Dashboard = () => {
+const Dashboard = (onLogout) => {
   const [user, setUser] = useState(() => {
     const cachedUser = localStorage.getItem('user');
     return cachedUser ? JSON.parse(cachedUser) : null;
@@ -14,19 +14,15 @@ const Dashboard = () => {
     axiosInstance.get('/profile').then((res) => {
       setUser(res.data);
     }).catch((err) => {
+      onLogout()
       navigate('/login')
       console.log(err);
     });
   }, []);
 
-  useEffect(() => {
-    
-    axiosInstance.get('/noop').catch(() => {});
-  }, []);
-
   if (!user) {
+    onLogout()
     navigate('/login');
-    return <p>User data not available.</p>;
   }
 
   return (
