@@ -14,12 +14,13 @@ const Dashboard = () => {
     axiosInstance.get('/profile').then((res) => {
       setUser(res.data);
     }).catch((err) => {
+      navigate('/login')
       console.log(err);
     });
   }, []);
 
   useEffect(() => {
-    // Call the no-op endpoint once on mount
+    
     axiosInstance.get('/noop').catch(() => {});
   }, []);
 
